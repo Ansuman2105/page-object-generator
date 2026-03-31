@@ -1,0 +1,1603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Page Object Generator | AI-Powered</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0b0e;
+    --surface: #111318;
+    --surface2: #181c24;
+    --border: #1f2533;
+    --border2: #2a3347;
+    --accent: #4f8ef7;
+    --accent2: #7b5ea7;
+    --green: #22c55e;
+    --orange: #f59e0b;
+    --red: #ef4444;
+    --text: #e8eaf0;
+    --muted: #6b7a99;
+    --muted2: #4a5568;
+    --playwright: #2ea44f;
+    --selenium: #43b02a;
+    --cypress: #04c38e;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Animated background grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: 
+      linear-gradient(rgba(79,142,247,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(79,142,247,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .noise {
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.5;
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  /* HEADER */
+  header {
+    padding: 28px 0 0;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(10,11,14,0.9) 0%, transparent 100%);
+  }
+
+  .header-inner {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding-bottom: 24px;
+  }
+
+  .logo-box {
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+    box-shadow: 0 0 20px rgba(79,142,247,0.3);
+  }
+
+  .logo-text h1 {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+
+  .logo-text span {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 400;
+  }
+
+  .badge-row {
+    display: flex;
+    gap: 8px;
+    margin-left: auto;
+    flex-wrap: wrap;
+  }
+
+  .badge {
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
+    border: 1px solid;
+  }
+
+  .badge.pw { color: var(--playwright); border-color: rgba(46,164,79,0.3); background: rgba(46,164,79,0.08); }
+  .badge.se { color: var(--selenium); border-color: rgba(67,176,42,0.3); background: rgba(67,176,42,0.08); }
+  .badge.cy { color: var(--cypress); border-color: rgba(4,195,142,0.3); background: rgba(4,195,142,0.08); }
+
+  /* MAIN TABS */
+  .main-tabs {
+    display: flex;
+    gap: 0;
+    margin-top: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .main-tab {
+    padding: 12px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--muted);
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    user-select: none;
+  }
+
+  .main-tab:hover { color: var(--text); }
+  .main-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* CONTENT */
+  .content {
+    padding: 32px 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    height: calc(100vh - 185px);
+    min-height: 600px;
+  }
+
+  @media (max-width: 768px) {
+    .content { grid-template-columns: 1fr; }
+  }
+
+  /* PANELS */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .panel-header {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface2);
+  }
+
+  .panel-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 6px var(--accent);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(0.85); }
+  }
+
+  .panel-actions {
+    margin-left: auto;
+    display: flex;
+    gap: 8px;
+  }
+
+  /* INPUT SECTION */
+  .input-body {
+    padding: 18px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .field-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .input-tabs {
+    display: flex;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 3px;
+    gap: 2px;
+  }
+
+  .input-tab {
+    flex: 1;
+    padding: 7px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    color: var(--muted);
+    transition: all 0.18s;
+    user-select: none;
+  }
+
+  .input-tab.active {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border2);
+  }
+
+  .input-field {
+    position: relative;
+  }
+
+  .url-row {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+  }
+
+  input[type="text"], textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+    resize: vertical;
+  }
+
+  input[type="text"]:focus, textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(79,142,247,0.1);
+  }
+
+  textarea {
+    min-height: 140px;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+
+  /* FRAMEWORK SELECTOR */
+  .framework-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .fw-btn {
+    padding: 10px 8px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.18s;
+    user-select: none;
+  }
+
+  .fw-btn:hover { border-color: var(--border2); background: var(--surface2); }
+
+  .fw-btn.active.pw { border-color: rgba(46,164,79,0.5); background: rgba(46,164,79,0.08); }
+  .fw-btn.active.se { border-color: rgba(67,176,42,0.5); background: rgba(67,176,42,0.08); }
+  .fw-btn.active.cy { border-color: rgba(4,195,142,0.5); background: rgba(4,195,142,0.08); }
+
+  .fw-icon { font-size: 20px; display: block; margin-bottom: 4px; }
+  .fw-name { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; }
+  .fw-btn.active.pw .fw-name { color: var(--playwright); }
+  .fw-btn.active.se .fw-name { color: var(--selenium); }
+  .fw-btn.active.cy .fw-name { color: var(--cypress); }
+  .fw-btn:not(.active) .fw-name { color: var(--muted); }
+
+  /* LANGUAGE SELECTOR */
+  .lang-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .lang-btn {
+    padding: 7px 14px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg);
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--muted);
+    transition: all 0.18s;
+    user-select: none;
+  }
+
+  .lang-btn:hover { color: var(--text); border-color: var(--border2); }
+  .lang-btn.active { color: var(--accent); border-color: var(--accent); background: rgba(79,142,247,0.08); }
+
+  /* OPTIONS */
+  .options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: border-color 0.18s;
+  }
+
+  .toggle-row:hover { border-color: var(--border2); }
+
+  .toggle {
+    width: 32px; height: 18px;
+    background: var(--border2);
+    border-radius: 100px;
+    position: relative;
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+
+  .toggle::after {
+    content: '';
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: white;
+    transition: transform 0.2s;
+  }
+
+  .toggle.on { background: var(--accent); }
+  .toggle.on::after { transform: translateX(14px); }
+
+  .toggle-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    line-height: 1.3;
+  }
+
+  /* GENERATE BUTTON */
+  .gen-btn {
+    width: 100%;
+    padding: 13px 20px;
+    background: linear-gradient(135deg, var(--accent), #3b73d8);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    letter-spacing: 0.01em;
+    box-shadow: 0 4px 20px rgba(79,142,247,0.25);
+  }
+
+  .gen-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(79,142,247,0.4); }
+  .gen-btn:active { transform: translateY(0); }
+  .gen-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .gen-btn .spinner {
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: none;
+  }
+
+  .gen-btn.loading .spinner { display: block; }
+  .gen-btn.loading .btn-label { opacity: 0.7; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* OUTPUT PANEL */
+  .output-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Tab bar for output */
+  .output-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .output-tab {
+    padding: 10px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--muted);
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: all 0.18s;
+    font-family: 'JetBrains Mono', monospace;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    user-select: none;
+  }
+
+  .output-tab:hover { color: var(--text); }
+  .output-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .output-tab .tab-badge {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    display: none;
+  }
+
+  .output-tab.has-content .tab-badge { display: block; }
+
+  /* Code block */
+  .code-wrap {
+    flex: 1;
+    overflow: auto;
+    position: relative;
+  }
+
+  .code-block {
+    padding: 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.7;
+    color: #abb2bf;
+    white-space: pre;
+    tab-size: 2;
+    min-height: 100%;
+  }
+
+  /* Syntax highlight colors */
+  .kw { color: #c678dd; }
+  .fn { color: #61afef; }
+  .str { color: #98c379; }
+  .num { color: #d19a66; }
+  .cmt { color: #5c6370; font-style: italic; }
+  .cls { color: #e5c07b; }
+  .dec { color: #e06c75; }
+  .prop { color: #abb2bf; }
+
+  /* Placeholder */
+  .placeholder {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 40px;
+    text-align: center;
+  }
+
+  .placeholder-icon {
+    width: 60px; height: 60px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    background: var(--surface2);
+  }
+
+  .placeholder h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .placeholder p {
+    font-size: 13px;
+    color: var(--muted);
+    max-width: 260px;
+    line-height: 1.6;
+  }
+
+  .feature-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+    margin-top: 4px;
+  }
+
+  .chip {
+    padding: 4px 10px;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* Small icon buttons */
+  .icon-btn {
+    width: 30px; height: 30px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: all 0.18s;
+    color: var(--muted);
+    position: relative;
+  }
+
+  .icon-btn:hover { border-color: var(--border2); color: var(--text); background: var(--surface2); }
+
+  .icon-btn .tooltip {
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--text);
+    color: var(--bg);
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 7px;
+    border-radius: 4px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s;
+  }
+
+  .icon-btn:hover .tooltip { opacity: 1; }
+
+  /* Stats bar */
+  .stats-bar {
+    padding: 10px 18px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--surface2);
+  }
+
+  .stat {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--muted);
+  }
+
+  .stat-val { color: var(--text); font-weight: 600; }
+
+  /* LOADING OVERLAY */
+  .loading-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(10,11,14,0.85);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    z-index: 10;
+    backdrop-filter: blur(4px);
+  }
+
+  .loading-overlay.show { display: flex; }
+
+  .loading-ring {
+    width: 48px; height: 48px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  .loading-text {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+  }
+
+  .loading-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 220px;
+  }
+
+  .loading-step {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--muted2);
+    transition: color 0.3s;
+  }
+
+  .loading-step.done { color: var(--green); }
+  .loading-step.active { color: var(--text); }
+
+  .step-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+  }
+
+  /* COPY ANIMATION */
+  .copy-success {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: var(--green);
+    color: white;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    z-index: 1000;
+    transform: translateY(80px);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .copy-success.show { transform: translateY(0); }
+
+  /* Error state */
+  .error-msg {
+    background: rgba(239,68,68,0.08);
+    border: 1px solid rgba(239,68,68,0.3);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 12px;
+    color: #fca5a5;
+    font-family: 'JetBrains Mono', monospace;
+    display: none;
+  }
+
+  .error-msg.show { display: block; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted2); }
+
+  /* Provider selector */
+  .provider-section { display: flex; flex-direction: column; gap: 8px; }
+
+  .provider-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 7px;
+  }
+
+  .provider-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 11px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    cursor: pointer;
+    transition: all 0.18s;
+    position: relative;
+    user-select: none;
+  }
+
+  .provider-btn:hover { border-color: var(--border2); background: var(--surface2); }
+
+  .provider-btn.active {
+    border-color: var(--accent);
+    background: rgba(79,142,247,0.08);
+  }
+
+  .provider-icon { font-size: 16px; flex-shrink: 0; }
+
+  .provider-info { flex: 1; min-width: 0; }
+  .provider-name { font-size: 12px; font-weight: 700; color: var(--text); }
+  .provider-sub  { font-size: 10px; color: var(--muted); font-family: 'JetBrains Mono', monospace; margin-top: 1px; }
+
+  .provider-free-badge {
+    font-size: 9px; font-weight: 800;
+    color: var(--green); background: rgba(34,197,94,0.12);
+    border: 1px solid rgba(34,197,94,0.3);
+    border-radius: 4px; padding: 2px 5px;
+    letter-spacing: 0.05em; flex-shrink: 0;
+  }
+
+  .provider-paid-badge {
+    font-size: 9px; font-weight: 800;
+    color: var(--orange); background: rgba(245,158,11,0.12);
+    border: 1px solid rgba(245,158,11,0.3);
+    border-radius: 4px; padding: 2px 5px;
+    letter-spacing: 0.05em; flex-shrink: 0;
+  }
+
+  .provider-hint {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    padding: 6px 10px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    line-height: 1.5;
+  }
+
+</style>
+</head>
+<body>
+<div class="noise"></div>
+
+<div class="wrap">
+  <header>
+    <div class="header-inner">
+      <div class="logo-box">🎯</div>
+      <div class="logo-text">
+        <h1>Page Object Generator</h1>
+        <span>AI-powered locator optimization engine</span>
+      </div>
+      <div class="badge-row">
+        <span class="badge pw">Playwright</span>
+        <span class="badge se">Selenium</span>
+        <span class="badge cy">Cypress</span>
+      </div>
+    </div>
+    <div class="main-tabs">
+      <div class="main-tab active" data-tab="generator">⚡ Generator</div>
+      <div class="main-tab" data-tab="how">📖 How It Works</div>
+    </div>
+  </header>
+
+  <!-- GENERATOR TAB -->
+  <div id="tab-generator" class="content">
+    <!-- LEFT: Input Panel -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <div class="dot"></div>
+          Input Configuration
+        </div>
+      </div>
+      <div class="input-body">
+
+        <!-- AI Provider + API Key -->
+        <div class="provider-section">
+          <div class="field-label">AI Provider</div>
+          <div class="provider-grid">
+            <div class="provider-btn active" data-provider="gemini">
+              <span class="provider-icon">🔵</span>
+              <div class="provider-info">
+                <div class="provider-name">Gemini</div>
+                <div class="provider-sub">Free · 1500/day</div>
+              </div>
+              <span class="provider-free-badge">FREE</span>
+            </div>
+            <div class="provider-btn" data-provider="groq">
+              <span class="provider-icon">⚡</span>
+              <div class="provider-info">
+                <div class="provider-name">Groq</div>
+                <div class="provider-sub">Free · Llama 3</div>
+              </div>
+              <span class="provider-free-badge">FREE</span>
+            </div>
+            <div class="provider-btn" data-provider="openrouter">
+              <span class="provider-icon">🔀</span>
+              <div class="provider-info">
+                <div class="provider-name">OpenRouter</div>
+                <div class="provider-sub">Free models</div>
+              </div>
+              <span class="provider-free-badge">FREE</span>
+            </div>
+            <div class="provider-btn" data-provider="anthropic">
+              <span class="provider-icon">🟣</span>
+              <div class="provider-info">
+                <div class="provider-name">Claude</div>
+                <div class="provider-sub">Paid credits</div>
+              </div>
+              <span class="provider-paid-badge">PAID</span>
+            </div>
+          </div>
+          <div class="provider-hint" id="provider-hint">
+            🔵 Get free key → <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--accent);">aistudio.google.com</a>
+          </div>
+          <div class="apikey-banner">
+            <span class="apikey-label">🔑</span>
+            <input type="password" id="apikey-input" placeholder="AIza..." autocomplete="off" />
+            <button class="apikey-save-btn" onclick="saveKey()">Save</button>
+            <span class="apikey-status" id="apikey-status" style="color:var(--muted);">○ Not set</span>
+          </div>
+        </div>
+
+
+        <!-- Input mode tabs -->
+        <div>
+          <div class="field-label">Input Mode</div>
+          <div class="input-tabs">
+            <div class="input-tab active" data-mode="url">🌐 URL</div>
+            <div class="input-tab" data-mode="html">📄 HTML</div>
+          </div>
+        </div>
+
+        <!-- URL Input -->
+        <div id="url-section" class="input-field">
+          <div class="field-label">Page URL</div>
+          <div class="url-row">
+            <input type="text" id="url-input" placeholder="https://example.com/login" />
+          </div>
+          <div style="margin-top:6px; font-size:11px; color:var(--muted); font-family:'JetBrains Mono',monospace;">
+            ℹ️ The AI will analyze the page structure and elements
+          </div>
+        </div>
+
+        <!-- HTML Input -->
+        <div id="html-section" class="input-field" style="display:none;">
+          <div class="field-label">HTML Source</div>
+          <textarea id="html-input" placeholder="Paste your HTML here...&#10;&#10;&lt;form&gt;&#10;  &lt;input id=&quot;username&quot; /&gt;&#10;  &lt;button class=&quot;login-btn&quot;&gt;Login&lt;/button&gt;&#10;&lt;/form&gt;"></textarea>
+        </div>
+
+        <!-- Page Name -->
+        <div class="input-field">
+          <div class="field-label">Page / Class Name</div>
+          <input type="text" id="page-name" placeholder="LoginPage" />
+        </div>
+
+        <!-- Framework -->
+        <div>
+          <div class="field-label">Framework</div>
+          <div class="framework-grid">
+            <div class="fw-btn active pw" data-fw="playwright">
+              <span class="fw-icon">🎭</span>
+              <div class="fw-name">Playwright</div>
+            </div>
+            <div class="fw-btn se" data-fw="selenium">
+              <span class="fw-icon">🔬</span>
+              <div class="fw-name">Selenium</div>
+            </div>
+            <div class="fw-btn cy" data-fw="cypress">
+              <span class="fw-icon">🌲</span>
+              <div class="fw-name">Cypress</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Language -->
+        <div>
+          <div class="field-label">Language</div>
+          <div class="lang-row">
+            <div class="lang-btn active" data-lang="typescript">TypeScript</div>
+            <div class="lang-btn" data-lang="javascript">JavaScript</div>
+            <div class="lang-btn" data-lang="python">Python</div>
+            <div class="lang-btn" data-lang="java">Java</div>
+            <div class="lang-btn" data-lang="csharp">C#</div>
+          </div>
+        </div>
+
+        <!-- Options -->
+        <div>
+          <div class="field-label">Options</div>
+          <div class="options-grid">
+            <div class="toggle-row" data-toggle="methods">
+              <div class="toggle on" id="toggle-methods"></div>
+              <div class="toggle-label">Include Action Methods</div>
+            </div>
+            <div class="toggle-row" data-toggle="assertions">
+              <div class="toggle on" id="toggle-assertions"></div>
+              <div class="toggle-label">Add Assertions</div>
+            </div>
+            <div class="toggle-row" data-toggle="comments">
+              <div class="toggle on" id="toggle-comments"></div>
+              <div class="toggle-label">JSDoc Comments</div>
+            </div>
+            <div class="toggle-row" data-toggle="waits">
+              <div class="toggle" id="toggle-waits"></div>
+              <div class="toggle-label">Explicit Waits</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="error-msg" class="error-msg"></div>
+
+        <button class="gen-btn" id="gen-btn" onclick="generate()">
+          <div class="spinner"></div>
+          <span class="btn-label">⚡ Generate Page Object</span>
+        </button>
+
+      </div>
+    </div>
+
+    <!-- RIGHT: Output Panel -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          Generated Code
+        </div>
+        <div class="panel-actions">
+          <button class="icon-btn" onclick="copyCode()" title="Copy">
+            📋
+            <span class="tooltip">Copy</span>
+          </button>
+          <button class="icon-btn" onclick="downloadCode()" title="Download">
+            ⬇️
+            <span class="tooltip">Download</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="output-tabs" id="output-tabs">
+        <div class="output-tab active" data-file="page">
+          <span class="tab-badge"></span>
+          PageObject.ts
+        </div>
+        <div class="output-tab" data-file="spec">
+          <span class="tab-badge"></span>
+          spec.ts
+        </div>
+      </div>
+
+      <div class="output-body" id="output-body">
+        <!-- Loading overlay -->
+        <div class="loading-overlay" id="loading-overlay">
+          <div class="loading-ring"></div>
+          <div class="loading-steps">
+            <div class="loading-step" id="step-1">
+              <div class="step-dot"></div>
+              Analyzing page structure...
+            </div>
+            <div class="loading-step" id="step-2">
+              <div class="step-dot"></div>
+              Identifying locators...
+            </div>
+            <div class="loading-step" id="step-3">
+              <div class="step-dot"></div>
+              Optimizing selectors...
+            </div>
+            <div class="loading-step" id="step-4">
+              <div class="step-dot"></div>
+              Generating page object...
+            </div>
+          </div>
+        </div>
+
+        <!-- Placeholder -->
+        <div class="placeholder" id="placeholder">
+          <div class="placeholder-icon">📋</div>
+          <h3>Ready to Generate</h3>
+          <p>Enter a URL or HTML, select your framework and language, then click Generate.</p>
+          <div class="feature-chips">
+            <span class="chip">Smart Locators</span>
+            <span class="chip">Best Practices</span>
+            <span class="chip">Action Methods</span>
+            <span class="chip">Type-safe</span>
+          </div>
+        </div>
+
+        <!-- Code output -->
+        <div class="code-wrap" id="code-wrap" style="display:none;">
+          <div class="code-block" id="code-output"></div>
+        </div>
+      </div>
+
+      <div class="stats-bar" id="stats-bar" style="display:none;">
+        <div class="stat">
+          <span>Elements:</span>
+          <span class="stat-val" id="stat-elements">0</span>
+        </div>
+        <div class="stat">
+          <span>Methods:</span>
+          <span class="stat-val" id="stat-methods">0</span>
+        </div>
+        <div class="stat">
+          <span>Lines:</span>
+          <span class="stat-val" id="stat-lines">0</span>
+        </div>
+        <div class="stat" style="margin-left:auto;">
+          <span class="stat-val" id="stat-fw" style="color:var(--green)">●</span>
+          <span id="stat-fw-name"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS TAB -->
+  <div id="tab-how" style="display:none; padding: 32px 0;">
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:16px;">
+      <div class="panel" style="padding:24px; gap:12px; display:flex; flex-direction:column;">
+        <div style="font-size:28px;">🌐</div>
+        <h3 style="font-size:15px; font-weight:700;">1. Input Your Page</h3>
+        <p style="font-size:13px; color:var(--muted); line-height:1.6;">Provide a URL or paste raw HTML. The AI analyzes structure, identifies interactive elements, forms, buttons, and links.</p>
+      </div>
+      <div class="panel" style="padding:24px; gap:12px; display:flex; flex-direction:column;">
+        <div style="font-size:28px;">🔍</div>
+        <h3 style="font-size:15px; font-weight:700;">2. Smart Locator Analysis</h3>
+        <p style="font-size:13px; color:var(--muted); line-height:1.6;">AI prioritizes robust locators: data-testid → ARIA roles → semantic selectors → IDs → CSS classes. Avoids brittle XPath.</p>
+      </div>
+      <div class="panel" style="padding:24px; gap:12px; display:flex; flex-direction:column;">
+        <div style="font-size:28px;">⚡</div>
+        <h3 style="font-size:15px; font-weight:700;">3. Code Generation</h3>
+        <p style="font-size:13px; color:var(--muted); line-height:1.6;">Generates production-ready page objects with action methods, assertions, and JSDoc comments following best practices.</p>
+      </div>
+      <div class="panel" style="padding:24px; gap:12px; display:flex; flex-direction:column;">
+        <div style="font-size:28px;">🚀</div>
+        <h3 style="font-size:15px; font-weight:700;">4. Export & Use</h3>
+        <p style="font-size:13px; color:var(--muted); line-height:1.6;">Copy or download the generated file. Integrates directly into your test suite with zero configuration needed.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="copy-success" id="copy-toast">✓ Copied to clipboard!</div>
+
+<script>
+
+// ─── AI PROVIDER + API KEY ───────────────────────────────────────────
+let savedApiKey = '';
+let selectedProvider = 'gemini';
+
+const PROVIDER_META = {
+  gemini:     { hint: '🔵 Get free key → aistudio.google.com/apikey',      placeholder: 'AIza...',        label: 'Gemini' },
+  groq:       { hint: '⚡ Get free key → console.groq.com/keys',           placeholder: 'gsk_...',        label: 'Groq' },
+  openrouter: { hint: '🔀 Get free key → openrouter.ai/settings/keys',     placeholder: 'sk-or-v1-...',   label: 'OpenRouter' },
+  anthropic:  { hint: '🟣 Purchase credits → console.anthropic.com',       placeholder: 'sk-ant-...',     label: 'Claude' },
+};
+
+document.querySelectorAll('.provider-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.provider-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedProvider = btn.dataset.provider;
+    const meta = PROVIDER_META[selectedProvider];
+    document.getElementById('apikey-input').placeholder = meta.placeholder;
+    document.getElementById('apikey-input').value = '';
+    document.getElementById('apikey-status').textContent = '○ Not set';
+    document.getElementById('apikey-status').style.color = 'var(--muted)';
+    document.getElementById('provider-hint').innerHTML = meta.hint.replace(/(https?:\/\/\S+|[\w.]+\.\w+\/\S*)/g, m => `<a href="https://${m.replace(/^https?:\/\//,'')}" target="_blank" style="color:var(--accent);">${m.replace(/^https?:\/\//,'')}</a>`);
+    savedApiKey = '';
+  });
+});
+
+function saveKey() {
+  const val = document.getElementById('apikey-input').value.trim();
+  if (val.length < 10) {
+    document.getElementById('apikey-status').textContent = '✗ Key too short';
+    document.getElementById('apikey-status').style.color = 'var(--red)';
+    return;
+  }
+  savedApiKey = val;
+  document.getElementById('apikey-status').textContent = '✓ Saved · ' + PROVIDER_META[selectedProvider].label;
+  document.getElementById('apikey-status').style.color = 'var(--green)';
+  document.getElementById('apikey-input').value = '•'.repeat(18);
+}
+
+async function callAI(prompt) {
+  if (selectedProvider === 'gemini') {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${savedApiKey}`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || 'Gemini API error');
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+  } else if (selectedProvider === 'groq') {
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${savedApiKey}` },
+      body: JSON.stringify({ model: 'llama-3.3-70b-versatile', max_tokens: 3000, messages: [{ role: 'user', content: prompt }] })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || 'Groq API error');
+    return data.choices?.[0]?.message?.content || '';
+
+  } else if (selectedProvider === 'openrouter') {
+    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${savedApiKey}`, 'HTTP-Referer': 'https://page-object-generator.app' },
+      body: JSON.stringify({ model: 'meta-llama/llama-3.3-70b-instruct:free', max_tokens: 3000, messages: [{ role: 'user', content: prompt }] })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || 'OpenRouter API error');
+    return data.choices?.[0]?.message?.content || '';
+
+  } else {
+    // Anthropic / Claude
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': savedApiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 3000, messages: [{ role: 'user', content: prompt }] })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || 'Anthropic API error');
+    return data.content?.map(c => c.text || '').join('') || '';
+  }
+}
+
+// ─── STATE ────────────────────────────────────────────────────────────
+const state = {
+  inputMode: 'url',
+  framework: 'playwright',
+  language: 'typescript',
+  toggles: { methods: true, assertions: true, comments: true, waits: false },
+  generatedCode: { page: '', spec: '' },
+  activeFile: 'page'
+};
+
+// ─── TAB SWITCHING ────────────────────────────────────────────────────
+document.querySelectorAll('.main-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const which = tab.dataset.tab;
+    document.getElementById('tab-generator').style.display = which === 'generator' ? 'grid' : 'none';
+    document.getElementById('tab-how').style.display = which === 'how' ? 'block' : 'none';
+  });
+});
+
+// ─── INPUT MODE ───────────────────────────────────────────────────────
+document.querySelectorAll('.input-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.input-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    state.inputMode = tab.dataset.mode;
+    document.getElementById('url-section').style.display = state.inputMode === 'url' ? 'block' : 'none';
+    document.getElementById('html-section').style.display = state.inputMode === 'html' ? 'block' : 'none';
+  });
+});
+
+// ─── FRAMEWORK ────────────────────────────────────────────────────────
+document.querySelectorAll('.fw-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.fw-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.framework = btn.dataset.fw;
+    updateOutputTabLabels();
+  });
+});
+
+// ─── LANGUAGE ─────────────────────────────────────────────────────────
+document.querySelectorAll('.lang-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.language = btn.dataset.lang;
+    updateOutputTabLabels();
+  });
+});
+
+// ─── TOGGLES ──────────────────────────────────────────────────────────
+document.querySelectorAll('.toggle-row').forEach(row => {
+  row.addEventListener('click', () => {
+    const key = row.dataset.toggle;
+    state.toggles[key] = !state.toggles[key];
+    document.getElementById(`toggle-${key}`).classList.toggle('on', state.toggles[key]);
+  });
+});
+
+// ─── OUTPUT TABS ──────────────────────────────────────────────────────
+document.querySelectorAll('.output-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.output-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    state.activeFile = tab.dataset.file;
+    if (state.generatedCode[state.activeFile]) {
+      showCode(state.generatedCode[state.activeFile]);
+    }
+  });
+});
+
+function updateOutputTabLabels() {
+  const ext = getFileExt();
+  const tabs = document.querySelectorAll('.output-tab');
+  const pageName = document.getElementById('page-name').value || 'PageObject';
+  tabs[0].innerHTML = `<span class="tab-badge"></span>${pageName}.${ext}`;
+  tabs[1].innerHTML = `<span class="tab-badge"></span>${pageName}.spec.${ext}`;
+  // Restore has-content
+  if (state.generatedCode.page) tabs[0].classList.add('has-content');
+  if (state.generatedCode.spec) tabs[1].classList.add('has-content');
+}
+
+function getFileExt() {
+  const exts = { typescript: 'ts', javascript: 'js', python: 'py', java: 'java', csharp: 'cs' };
+  return exts[state.language] || 'ts';
+}
+
+// ─── GENERATE ─────────────────────────────────────────────────────────
+async function generate() {
+  if (!savedApiKey) {
+    showError('Please enter and save your Anthropic API key first.');
+    document.getElementById('apikey-input').focus();
+    return;
+  }
+  const url = document.getElementById('url-input').value.trim();
+  const html = document.getElementById('html-input').value.trim();
+  const pageName = document.getElementById('page-name').value.trim() || 'MyPage';
+  const errEl = document.getElementById('error-msg');
+
+  if (state.inputMode === 'url' && !url) {
+    showError('Please enter a valid URL or switch to HTML mode.');
+    return;
+  }
+  if (state.inputMode === 'html' && !html) {
+    showError('Please paste some HTML content.');
+    return;
+  }
+
+  errEl.classList.remove('show');
+
+  const btn = document.getElementById('gen-btn');
+  btn.disabled = true;
+  btn.classList.add('loading');
+  btn.querySelector('.btn-label').textContent = 'Generating...';
+
+  showLoading();
+
+  // Step animation
+  await animateSteps();
+
+  const prompt = buildPrompt(url, html, pageName);
+
+  try {
+    const raw = await callAI(prompt);
+    const parsed = parseGeneratedCode(raw);
+
+    state.generatedCode.page = parsed.page;
+    state.generatedCode.spec = parsed.spec;
+
+    // Mark tabs as having content
+    document.querySelectorAll('.output-tab').forEach(t => t.classList.add('has-content'));
+    updateOutputTabLabels();
+
+    hideLoading();
+    showCode(state.generatedCode[state.activeFile]);
+    updateStats(parsed.page);
+
+  } catch (err) {
+    hideLoading();
+    showError('Generation failed: ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.classList.remove('loading');
+    btn.querySelector('.btn-label').textContent = '⚡ Generate Page Object';
+  }
+}
+
+function buildPrompt(url, html, pageName) {
+  const fw = state.framework;
+  const lang = state.language;
+  const opts = state.toggles;
+
+  const input = state.inputMode === 'url'
+    ? `Page URL: ${url}`
+    : `HTML Source:\n${html}`;
+
+  return `You are an expert test automation engineer. Generate a production-ready Page Object Model for the following page.
+
+${input}
+
+Requirements:
+- Framework: ${fw}
+- Language: ${lang}
+- Class name: ${pageName}
+- Include action methods: ${opts.methods}
+- Include assertions: ${opts.assertions}
+- Include JSDoc/docstring comments: ${opts.comments}
+- Add explicit waits/timeouts: ${opts.waits}
+
+Locator priority (use the most robust available):
+1. data-testid attributes
+2. ARIA roles and labels (getByRole, getByLabel)
+3. Semantic selectors
+4. IDs
+5. CSS classes (avoid fragile nth-child)
+6. Avoid XPath unless necessary
+
+Output EXACTLY this JSON structure. CRITICAL rules:
+- Output raw JSON only — no markdown, no explanation, no code fences
+- All newlines inside string values MUST be escaped as \\n
+- All double quotes inside string values MUST be escaped as \\"
+- All backslashes MUST be escaped as \\\\
+- The JSON must be parseable by JSON.parse()
+
+{
+  "page": "full page object code with \\n for newlines",
+  "spec": "example test spec code with \\n for newlines"
+}
+
+The page object must be complete, idiomatic ${lang} for ${fw}. Include:
+- At least 8-10 locator properties as class fields/attributes
+- At least 5-6 action methods (navigate, fill, click, submit, etc.)
+- Constructor/init that accepts page/driver parameter
+- Real selectors inferred from the URL or HTML provided
+If given a URL, infer realistic elements for that page type (login page → username, password, submit; dashboard → nav, search, widgets, etc.)`;
+}
+
+function parseGeneratedCode(raw) {
+  if (!raw) return { page: '// No output generated', spec: '// Test spec not available' };
+
+  // Strip outer markdown fences  ```json ... ``` or ``` ... ```
+  let text = raw.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim();
+
+  // Strategy 1: direct JSON.parse
+  try {
+    const obj = JSON.parse(text);
+    if (obj && obj.page) return { page: obj.page, spec: obj.spec || '// Spec not generated' };
+  } catch (_) {}
+
+  // Strategy 2: extract "page" and "spec" values via regex
+  // Handles cases where the JSON contains unescaped newlines inside string values
+  try {
+    const pageMatch = text.match(/"page"\s*:\s*"((?:[^"\\]|\\[\s\S])*?)"/s);
+    const specMatch = text.match(/"spec"\s*:\s*"((?:[^"\\]|\\[\s\S])*?)"/s);
+    if (pageMatch) {
+      const page = pageMatch[1].replace(/\\n/g, '\n').replace(/\\t/g, '\t').replace(/\\"/g, '"').replace(/\\\\/g, '\\');
+      const spec = specMatch ? specMatch[1].replace(/\\n/g, '\n').replace(/\\t/g, '\t').replace(/\\"/g, '"').replace(/\\\\/g, '\\') : '// Spec not generated';
+      if (page.length > 20) return { page, spec };
+    }
+  } catch (_) {}
+
+  // Strategy 3: find code blocks inside the response
+  const blocks = [...text.matchAll(/```(?:\w+)?\n([\s\S]*?)```/g)].map(m => m[1].trim());
+  if (blocks.length >= 2) return { page: blocks[0], spec: blocks[1] };
+  if (blocks.length === 1) return { page: blocks[0], spec: '// Spec not generated' };
+
+  // Strategy 4: use raw text as page object
+  return { page: text, spec: '// Spec not generated' };
+}
+
+function showCode(code) {
+  document.getElementById('placeholder').style.display = 'none';
+  document.getElementById('code-wrap').style.display = 'block';
+  document.getElementById('code-output').innerHTML = syntaxHighlight(code);
+  document.getElementById('stats-bar').style.display = 'flex';
+}
+
+function updateStats(code) {
+  const lines = code.split('\n').filter(l => l.trim()).length; // non-blank lines
+  // Methods: async fn, def fn, public fn, arrow fns, Cypress commands
+  const methods = (code.match(
+    /async\s+\w+\s*\(|def\s+\w+\s*\(|public\s+\w+\s*\(|\w+\s*=\s*async\s*\(|\w+\s*=\s*\(/g
+  ) || []).filter((m,i,a) => a.indexOf(m) === i).length;
+  // Elements: all common locator patterns across all frameworks & languages
+  const elements = (code.match(
+    /self\.\w+\s*=|this\.\w+\s*=|get\w+\(|locator\(|findElement|By\.|getByRole|getByLabel|getByText|getByPlaceholder|getByTestId|cy\.get|driver\.find/g
+  ) || []).length;
+  document.getElementById('stat-lines').textContent = lines;
+  document.getElementById('stat-methods').textContent = Math.max(0, methods - 1); // -1 for constructor
+  document.getElementById('stat-elements').textContent = elements;
+  document.getElementById('stat-fw-name').textContent = state.framework.charAt(0).toUpperCase() + state.framework.slice(1);
+}
+
+function syntaxHighlight(code) {
+  // Token-based highlighter: scan left-to-right, never re-process emitted HTML
+  const KEYWORDS = new Set([
+    'import','export','class','extends','implements','constructor','async','await',
+    'return','const','let','var','new','this','super','public','private','protected',
+    'static','readonly','interface','type','void','string','number','boolean',
+    'null','undefined','true','false','def','self','from','pass','None','True','False',
+    'if','else','elif','for','while','in','not','and','or','with','as','try','except',
+    'finally','raise','yield','lambda','global','nonlocal','del','assert','break',
+    'continue','switch','case','default','throw','catch','typeof','instanceof',
+    'package','import','abstract','final','throws','void','int','float','double',
+    'boolean','char','byte','short','long','override','virtual','namespace','using'
+  ]);
+
+  let out = '';
+  let i = 0;
+  const len = code.length;
+
+  function esc(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  while (i < len) {
+    const ch = code[i];
+    const rest = code.slice(i);
+
+    // Single-line comment: // ...
+    if (ch === '/' && code[i+1] === '/') {
+      const end = code.indexOf('\n', i);
+      const chunk = end === -1 ? code.slice(i) : code.slice(i, end);
+      out += '<span class="cmt">' + esc(chunk) + '</span>';
+      i += chunk.length;
+      continue;
+    }
+
+    // Single-line comment: # ...  (Python)
+    if (ch === '#') {
+      const end = code.indexOf('\n', i);
+      const chunk = end === -1 ? code.slice(i) : code.slice(i, end);
+      out += '<span class="cmt">' + esc(chunk) + '</span>';
+      i += chunk.length;
+      continue;
+    }
+
+    // Multi-line comment: /* ... */
+    if (ch === '/' && code[i+1] === '*') {
+      const end = code.indexOf('*/', i + 2);
+      const chunk = end === -1 ? code.slice(i) : code.slice(i, end + 2);
+      out += '<span class="cmt">' + esc(chunk) + '</span>';
+      i += chunk.length;
+      continue;
+    }
+
+    // String: single, double, or backtick quoted
+    if (ch === '"' || ch === "'" || ch === '`') {
+      const q = ch;
+      let j = i + 1;
+      while (j < len) {
+        if (code[j] === '\\') { j += 2; continue; }
+        if (code[j] === q) { j++; break; }
+        if (q !== '`' && code[j] === '\n') break; // unterminated
+        j++;
+      }
+      const chunk = code.slice(i, j);
+      out += '<span class="str">' + esc(chunk) + '</span>';
+      i = j;
+      continue;
+    }
+
+    // Word token: keyword, class name, or function call
+    if (/[a-zA-Z_$]/.test(ch)) {
+      let j = i;
+      while (j < len && /[\w$]/.test(code[j])) j++;
+      const word = code.slice(i, j);
+      // peek past whitespace for '('
+      let k = j;
+      while (k < len && (code[k] === ' ' || code[k] === '\t')) k++;
+      const isFnCall = code[k] === '(';
+
+      if (KEYWORDS.has(word)) {
+        out += '<span class="kw">' + esc(word) + '</span>';
+      } else if (/^[A-Z]/.test(word)) {
+        out += '<span class="cls">' + esc(word) + '</span>';
+      } else if (isFnCall) {
+        out += '<span class="fn">' + esc(word) + '</span>';
+      } else {
+        out += esc(word);
+      }
+      i = j;
+      continue;
+    }
+
+    // Numeric literal
+    if (/[0-9]/.test(ch) || (ch === '.' && /[0-9]/.test(code[i+1]||''))) {
+      let j = i;
+      while (j < len && /[0-9._xXa-fA-FbBoO]/.test(code[j])) j++;
+      out += '<span class="num">' + esc(code.slice(i, j)) + '</span>';
+      i = j;
+      continue;
+    }
+
+    // Everything else — emit escaped
+    out += esc(ch);
+    i++;
+  }
+
+  return out;
+}
+
+// ─── LOADING ANIMATION ────────────────────────────────────────────────
+function showLoading() {
+  document.getElementById('loading-overlay').classList.add('show');
+  document.getElementById('placeholder').style.display = 'none';
+  ['step-1','step-2','step-3','step-4'].forEach(id => {
+    document.getElementById(id).className = 'loading-step';
+  });
+}
+
+function hideLoading() {
+  document.getElementById('loading-overlay').classList.remove('show');
+}
+
+async function animateSteps() {
+  const steps = ['step-1','step-2','step-3','step-4'];
+  for (let i = 0; i < steps.length; i++) {
+    if (i > 0) document.getElementById(steps[i-1]).className = 'loading-step done';
+    document.getElementById(steps[i]).className = 'loading-step active';
+    await delay(500 + Math.random() * 400);
+  }
+}
+
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ─── UTILS ────────────────────────────────────────────────────────────
+function showError(msg) {
+  const el = document.getElementById('error-msg');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+
+function copyCode() {
+  const code = state.generatedCode[state.activeFile];
+  if (!code) return;
+  navigator.clipboard.writeText(code).then(() => {
+    const toast = document.getElementById('copy-toast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2200);
+  });
+}
+
+function downloadCode() {
+  const code = state.generatedCode[state.activeFile];
+  if (!code) return;
+  const pageName = document.getElementById('page-name').value || 'PageObject';
+  const ext = getFileExt();
+  const suffix = state.activeFile === 'spec' ? `.spec.${ext}` : `.${ext}`;
+  const blob = new Blob([code], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = pageName + suffix;
+  a.click();
+}
+
+// Update labels when page name changes
+document.getElementById('page-name').addEventListener('input', updateOutputTabLabels);
+</script>
+</body>
+</html>
